@@ -31,9 +31,9 @@ function imageFromDescription(description) {
 function imageSources(url) {
   const encodedUrl = encodeURIComponent(url);
   const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-  const imageCdnUrl = `/.netlify/images?url=${encodedUrl}&w=160&h=160&fit=cover&fm=jpg&q=72`;
+  const imageCdnUrl = `/.netlify/images?url=${encodedUrl}&w=320&h=320&fit=cover`;
   const functionUrl = `/.netlify/functions/image-proxy?url=${encodedUrl}`;
-  return isLocal ? [functionUrl, imageCdnUrl, url] : [imageCdnUrl, functionUrl, url];
+  return isLocal ? [functionUrl, imageCdnUrl] : [imageCdnUrl, functionUrl];
 }
 
 function loadImage(url) {
@@ -46,7 +46,36 @@ function loadImage(url) {
 }
 
 function posterize(value) {
-  return Math.round(value / 85) * 85;
+  return Math.round(value / 51) * 51;
+}
+
+function placeholderBitmap() {
+  const size = 288;
+  const block = 24;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = size;
+  canvas.height = size;
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = "#000055";
+  ctx.fillRect(0, 0, size, size);
+
+  for (let y = 0; y < size; y += block) {
+    for (let x = 0; x < size; x += block) {
+      ctx.fillStyle = (x + y) / block % 2 === 0 ? "#ff00aa" : "#00ccff";
+      ctx.fillRect(x, y, block, block);
+    }
+  }
+
+  ctx.fillStyle = "#ffff00";
+  ctx.font = "bold 34px monospace";
+  ctx.fillText("NO IMG", 78, 154);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
+  for (let y = 0; y < size; y += 4) {
+    ctx.fillRect(0, y, size, 1);
+  }
+
+  return canvas.toDataURL("image/png");
 }
 
 async function degradeImage(url, imgEl) {
@@ -167,11 +196,12 @@ async function loadFeed() {
 
       if (imageUrl) {
         degradeImage(imageUrl, episodeImage).catch(() => {
-          episodeImage.src = imageUrl;
+          episodeImage.src = placeholderBitmap();
           episodeImage.classList.add("loaded");
         });
       } else {
-        episodeImage.remove();
+        episodeImage.src = placeholderBitmap();
+        episodeImage.classList.add("loaded");
       }
 
       fragment.appendChild(li);
