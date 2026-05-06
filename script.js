@@ -28,8 +28,12 @@ function imageFromDescription(description) {
   return div.querySelector("img")?.src || "";
 }
 
-function imageProxyUrl(url) {
-  return `/.netlify/functions/image-proxy?url=${encodeURIComponent(url)}`;
+function imageSources(url) {
+  const encodedUrl = encodeURIComponent(url);
+  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  const imageCdnUrl = `/.netlify/images?url=${encodedUrl}&w=160&h=160&fit=cover&fm=jpg&q=72`;
+  const functionUrl = `/.netlify/functions/image-proxy?url=${encodedUrl}`;
+  return isLocal ? [functionUrl, imageCdnUrl, url] : [imageCdnUrl, functionUrl, url];
 }
 
 function loadImage(url) {
@@ -46,7 +50,20 @@ function posterize(value) {
 }
 
 async function degradeImage(url, imgEl) {
-  const img = await loadImage(imageProxyUrl(url));
+  let img;
+  for (const source of imageSources(url)) {
+    try {
+      img = await loadImage(source);
+      break;
+    } catch (error) {
+      img = null;
+    }
+  }
+
+  if (!img) {
+    throw new Error("No image source could be loaded.");
+  }
+
   const size = 288;
   const tinySize = 96;
   const tiny = document.createElement("canvas");
@@ -150,7 +167,8 @@ async function loadFeed() {
 
       if (imageUrl) {
         degradeImage(imageUrl, episodeImage).catch(() => {
-          episodeImage.remove();
+          episodeImage.src = imageUrl;
+          episodeImage.classList.add("loaded");
         });
       } else {
         episodeImage.remove();
