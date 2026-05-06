@@ -28,25 +28,8 @@ function imageFromDescription(description) {
   return div.querySelector("img")?.src || "";
 }
 
-function imageSources(url) {
-  const encodedUrl = encodeURIComponent(url);
-  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-  const imageCdnUrl = `/.netlify/images?url=${encodedUrl}&w=320&h=320&fit=cover`;
-  const functionUrl = `/.netlify/functions/image-proxy?url=${encodedUrl}`;
-  return isLocal ? [functionUrl, imageCdnUrl] : [imageCdnUrl, functionUrl];
-}
-
-function loadImage(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Image failed to load."));
-    img.src = url;
-  });
-}
-
-function posterize(value) {
-  return Math.round(value / 51) * 51;
+function futzImageUrl(url) {
+  return `/.netlify/functions/futz-image?url=${encodeURIComponent(url)}`;
 }
 
 function placeholderBitmap() {
@@ -76,58 +59,6 @@ function placeholderBitmap() {
   }
 
   return canvas.toDataURL("image/png");
-}
-
-async function degradeImage(url, imgEl) {
-  let img;
-  for (const source of imageSources(url)) {
-    try {
-      img = await loadImage(source);
-      break;
-    } catch (error) {
-      img = null;
-    }
-  }
-
-  if (!img) {
-    throw new Error("No image source could be loaded.");
-  }
-
-  const size = 288;
-  const tinySize = 96;
-  const tiny = document.createElement("canvas");
-  const canvas = document.createElement("canvas");
-  const tinyCtx = tiny.getContext("2d");
-  const ctx = canvas.getContext("2d");
-
-  tiny.width = tinySize;
-  tiny.height = tinySize;
-  canvas.width = size;
-  canvas.height = size;
-  tinyCtx.imageSmoothingEnabled = false;
-  ctx.imageSmoothingEnabled = false;
-
-  const side = Math.min(img.naturalWidth, img.naturalHeight);
-  const sx = (img.naturalWidth - side) / 2;
-  const sy = (img.naturalHeight - side) / 2;
-  tinyCtx.drawImage(img, sx, sy, side, side, 0, 0, tinySize, tinySize);
-
-  const imageData = tinyCtx.getImageData(0, 0, tinySize, tinySize);
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    imageData.data[i] = posterize(imageData.data[i]);
-    imageData.data[i + 1] = posterize(imageData.data[i + 1]);
-    imageData.data[i + 2] = posterize(imageData.data[i + 2]);
-  }
-  tinyCtx.putImageData(imageData, 0, 0);
-
-  ctx.drawImage(tiny, 0, 0, size, size);
-  ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
-  for (let y = 0; y < size; y += 4) {
-    ctx.fillRect(0, y, size, 1);
-  }
-
-  imgEl.src = canvas.toDataURL("image/png");
-  imgEl.classList.add("loaded");
 }
 
 async function loadFeed() {
@@ -195,10 +126,14 @@ async function loadFeed() {
       li.append(episodeImage, episodeBody);
 
       if (imageUrl) {
-        degradeImage(imageUrl, episodeImage).catch(() => {
+        episodeImage.onload = () => {
+          episodeImage.classList.add("loaded");
+        };
+        episodeImage.onerror = () => {
           episodeImage.src = placeholderBitmap();
           episodeImage.classList.add("loaded");
-        });
+        };
+        episodeImage.src = futzImageUrl(imageUrl);
       } else {
         episodeImage.src = placeholderBitmap();
         episodeImage.classList.add("loaded");
