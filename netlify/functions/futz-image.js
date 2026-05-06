@@ -2,7 +2,7 @@ const sharp = require("sharp");
 
 const OUTPUT_SIZE = 288;
 const PIXEL_SIZE = 96;
-const POSTERIZE_STEP = 17;
+const POSTERIZE_STEP = 34;
 const ALLOWED_HOSTS = new Set(["hosting-media.riverside.com"]);
 
 function clamp(value) {
@@ -71,8 +71,9 @@ exports.handler = async function handler(event) {
     const input = Buffer.from(await response.arrayBuffer());
     const tiny = await sharp(input)
       .rotate()
-      .resize(PIXEL_SIZE, PIXEL_SIZE, { fit: "cover", position: "center" })
-      .modulate({ saturation: 1.18 })
+      .resize(PIXEL_SIZE, PIXEL_SIZE, { fit: "cover", position: "center", kernel: "nearest" })
+      .linear(1.28, -36)
+      .modulate({ saturation: 1.35 })
       .ensureAlpha()
       .raw()
       .toBuffer();
