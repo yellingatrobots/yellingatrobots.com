@@ -32,6 +32,27 @@ function futzImageUrl(url) {
   return `/.netlify/functions/futz-image?url=${encodeURIComponent(url)}`;
 }
 
+function normalizeTitle(title) {
+  return title
+    .toLowerCase()
+    .replace(/&amp;/g, "&")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+async function loadYoutubeLinks() {
+  try {
+    const response = await fetch("/.netlify/functions/youtube-links");
+    if (!response.ok) return new Map();
+
+    const data = await response.json();
+    return new Map((data.videos || []).map((video) => [normalizeTitle(video.title), video.url]));
+  } catch (error) {
+    console.error(error);
+    return new Map();
+  }
+}
+
 function placeholderBitmap() {
   const size = 288;
   const block = 24;
@@ -66,7 +87,10 @@ async function loadFeed() {
   const list = document.getElementById("feed-list");
 
   try {
-    const response = await fetch("/.netlify/functions/feed");
+    const [response, youtubeLinks] = await Promise.all([
+      fetch("/.netlify/functions/feed"),
+      loadYoutubeLinks(),
+    ]);
     if (!response.ok) {
       throw new Error(`Feed request failed with status ${response.status}`);
     }
@@ -93,6 +117,9 @@ async function loadFeed() {
       const li = document.createElement("li");
       const title = text(item, "title") || "Untitled episode";
       const link = text(item, "link");
+      const enclosureUrl = firstAttr(item, "enclosure", "url");
+      const youtubeUrl = youtubeLinks.get(normalizeTitle(title));
+      const episodeUrl = youtubeUrl || link || enclosureUrl || "https://api.riverside.com/hosting/KCX6qbiI.rss";
       const pubDate = safeDate(text(item, "pubDate"));
       const rawDescription = text(item, "description");
       const description = stripHtml(rawDescription).slice(0, 260);
@@ -109,10 +136,11 @@ async function loadFeed() {
 
       const titleLink = document.createElement("a");
       titleLink.className = "feed-title";
-      titleLink.href = link || "#";
+      titleLink.href = episodeUrl;
       titleLink.target = "_blank";
       titleLink.rel = "noopener noreferrer";
       titleLink.textContent = title;
+      if (youtubeUrl) titleLink.classList.add("youtube-link");
 
       const date = document.createElement("span");
       date.className = "feed-date";

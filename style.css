@@ -1,11 +1,13 @@
 :root {
-  --bg1: #07011f;
-  --bg2: #25003d;
-  --panel: #fff8c9;
-  --ink: #2d0067;
+  --bg1: #050014;
+  --bg2: #1a0038;
+  --panel: #fff3b5;
+  --panel2: #fffde7;
+  --ink: #24004f;
   --accent: #ff007a;
   --accent2: #06d6ff;
   --good: #0a8f08;
+  --edge: #12001f;
 }
 
 * {
@@ -17,10 +19,14 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background:
+    linear-gradient(90deg, #00000055 1px, transparent 1px),
+    linear-gradient(#00000055 1px, transparent 1px),
     radial-gradient(circle at 20% 20%, #ffffff66 0 2px, transparent 3px),
     radial-gradient(circle at 80% 80%, #ffffff55 0 2px, transparent 3px),
-    repeating-linear-gradient(45deg, #0a012c 0 16px, #1a0042 16px 32px),
+    radial-gradient(circle at 50% 10%, #ff00aa44, transparent 32vw),
+    repeating-linear-gradient(45deg, #080026 0 16px, #1a0042 16px 32px),
     linear-gradient(180deg, var(--bg1), var(--bg2));
+  background-size: 48px 48px, 48px 48px, auto, auto, auto, auto, auto;
   font-family: "Comic Sans MS", "Trebuchet MS", sans-serif;
 }
 
@@ -39,14 +45,14 @@ body {
 .page-wrap {
   position: relative;
   z-index: 1;
-  width: min(1100px, 94vw);
-  margin: 18px auto;
+  width: min(1240px, 94vw);
+  margin: 20px auto 28px;
 }
 
 .box {
   border: 3px ridge #ffd400;
   background: var(--panel);
-  box-shadow: 0 0 0 2px #000, 0 0 20px #00f7ff66;
+  box-shadow: 0 0 0 2px #000, 10px 10px 0 #00000070, 0 0 24px #00f7ff55;
 }
 
 .top-banner {
@@ -54,8 +60,11 @@ body {
   padding: 14px;
   text-align: center;
   border: 4px double #00ffea;
-  background: linear-gradient(90deg, #ffeb3b, #ff7b00, #ffeb3b);
+  background:
+    linear-gradient(180deg, #ffffff80, transparent 42%),
+    linear-gradient(90deg, #ffeb3b, #ff7b00 45%, #ff00aa 75%, #7a00ff);
   color: #24004a;
+  box-shadow: 0 0 0 3px #000, 0 0 34px #ff00aa88;
 }
 
 h1,
@@ -66,8 +75,40 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(1.6rem, 4vw, 2.8rem);
-  text-shadow: 2px 2px 0 #fff;
+  margin: 0;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+.site-title {
+  display: inline-grid;
+  gap: 2px;
+  margin: 2px auto 6px;
+  padding: 6px 18px 12px;
+  border: 3px ridge #fff200;
+  background:
+    linear-gradient(180deg, #ffffff99 0 16%, transparent 16%),
+    repeating-linear-gradient(-8deg, #2b0058 0 10px, #3b006f 10px 20px);
+  box-shadow: 7px 7px 0 #00f0ff, 11px 11px 0 #000;
+}
+
+.title-kicker,
+.title-main {
+  display: block;
+}
+
+.title-kicker {
+  color: #fff200;
+  font-size: clamp(1.5rem, 4vw, 3.2rem);
+  letter-spacing: 0.08em;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.title-main {
+  color: #ff3b9d;
+  font-size: clamp(3.2rem, 12vw, 8.4rem);
+  letter-spacing: 0.03em;
+  text-shadow: 3px 3px 0 #fff, 7px 7px 0 #00f0ff, 10px 10px 0 #000;
 }
 
 h2 {
@@ -76,10 +117,19 @@ h2 {
   text-shadow: 1px 1px 0 #fff;
 }
 
+.tagline {
+  max-width: 760px;
+  margin: 10px auto 12px;
+  padding: 7px 12px;
+  border: 2px dashed #001aa0;
+  background: #ffffffe0;
+  font-weight: 900;
+}
+
 .layout {
   display: grid;
-  grid-template-columns: 230px 1fr 230px;
-  gap: 14px;
+  grid-template-columns: 210px minmax(0, 1fr) 230px;
+  gap: 18px;
   align-items: start;
 }
 
@@ -92,18 +142,34 @@ h2 {
 
 .chrome {
   background:
+    linear-gradient(135deg, #ffffffbb, transparent 38%),
     repeating-linear-gradient(180deg, #fff8c9, #fff8c9 14px, #ffef9a 14px, #ffef9a 28px);
 }
 
 .left-rail ul {
-  list-style: square;
-  padding-left: 18px;
+  margin: 10px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.left-rail li {
+  margin-bottom: 8px;
+}
+
+.left-rail a,
+.platform-links a {
+  display: block;
+  padding: 7px 9px;
+  border: 2px outset #fff;
+  background: linear-gradient(180deg, #fff, #ffd7f0);
+  box-shadow: 3px 3px 0 #00000055;
+  text-decoration: none;
 }
 
 .platform-links {
   margin: 8px 0 12px;
-  padding-left: 18px;
-  list-style: square;
+  padding: 0;
+  list-style: none;
 }
 
 .platform-links li {
@@ -117,31 +183,79 @@ a {
 
 a:hover {
   color: var(--accent);
+  transform: translate(1px, 1px);
 }
 
 .content {
   min-height: 420px;
+  background:
+    linear-gradient(180deg, #fffbe6, #ffeaa0),
+    var(--panel);
 }
 
 .status {
-  margin-top: 4px;
+  display: inline-block;
+  margin: 4px 0 6px;
+  padding: 5px 9px;
+  border: 2px inset #fff;
+  background: #050505;
   font-weight: 700;
-  color: var(--good);
+  color: #39ff14;
+  font-family: "Courier New", monospace;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 3px double #ff8d00;
+}
+
+.section-header .tiny {
+  margin: 0;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 3rem);
 }
 
 .feed-list {
+  counter-reset: episode;
   margin: 12px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .feed-list li {
+  position: relative;
   display: flex;
-  gap: 12px;
-  margin-bottom: 10px;
-  padding: 10px;
-  border: 2px dashed #ff8d00;
-  background: #ffffef;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 12px;
+  border: 3px ridge #ff8d00;
+  background:
+    linear-gradient(180deg, #ffffff, #fff7d1 55%, #ffe6fb),
+    #ffffef;
+  box-shadow: 5px 5px 0 #4a005f55;
+  counter-increment: episode;
+}
+
+.feed-list li::before {
+  content: "EP " counter(episode);
+  position: absolute;
+  top: -12px;
+  right: 12px;
+  padding: 2px 8px;
+  border: 2px solid #000;
+  background: #00f0ff;
+  color: #000;
+  font-family: "Courier New", monospace;
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .episode-image {
@@ -159,6 +273,7 @@ a:hover {
   background-size: 16px 16px;
   image-rendering: pixelated;
   opacity: 0;
+  filter: drop-shadow(5px 5px 0 #00000070);
 }
 
 .episode-image.loaded {
@@ -167,12 +282,26 @@ a:hover {
 
 .episode-body {
   min-width: 0;
+  padding: 6px 4px 0;
 }
 
 .feed-title {
   display: block;
-  margin-bottom: 4px;
-  font-size: 1.05rem;
+  margin: 0 44px 6px 0;
+  color: #000a9f;
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.feed-title.youtube-link::after {
+  content: "  ▶ YOUTUBE";
+  color: #f00;
+  font-family: "Courier New", monospace;
+  font-size: 0.78rem;
+  text-shadow: none;
 }
 
 .feed-date {
@@ -184,7 +313,8 @@ a:hover {
 
 .feed-desc {
   margin: 0;
-  line-height: 1.35;
+  line-height: 1.45;
+  font-size: 1.02rem;
 }
 
 .counter-wrap {
@@ -204,8 +334,10 @@ a:hover {
 }
 
 .tiny {
+  margin: 0.3em 0;
   font-size: 0.76rem;
   text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
 .mood {
@@ -215,8 +347,25 @@ a:hover {
   text-shadow: 1px 1px 0 #000;
 }
 
+.signal-box {
+  padding: 8px;
+  border: 2px inset #fff;
+  background: #27003e;
+}
+
+.signal-box .mood {
+  margin: 0;
+}
+
+.copyright {
+  text-align: center;
+}
+
 .footer {
   margin-top: 16px;
+  background: #050505;
+  color: #39ff14;
+  font-family: "Courier New", monospace;
 }
 
 .blink {

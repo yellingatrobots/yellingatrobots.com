@@ -10,8 +10,12 @@
     <div class="stars" aria-hidden="true"></div>
     <div class="page-wrap">
       <header class="top-banner">
-        <p class="tiny">BEST VIEWED IN NETSCAPE 4.7 AT 800x600</p>
-        <h1>YELLING AT ROBOTS</h1>
+        <p class="tiny">INDEPENDENT TECH TALK / LIVE RSS MIRROR</p>
+        <h1 class="site-title">
+          <span class="title-kicker">Yelling At</span>
+          <span class="title-main">Robots</span>
+        </h1>
+        <p class="tagline">Speedrunning the AI Gauntlet with blood shooting out of our eyes so you don't have to! </p>
         <marquee behavior="alternate" scrollamount="6">
           <span class="blink">NEW EPISODES</span> * FRESH FEED * UNDER CONSTRUCTION * HOT AUDIO DROPS *
         </marquee>
@@ -19,19 +23,26 @@
 
       <main class="layout">
         <aside class="left-rail box chrome">
-          <h2>Navigation</h2>
+          <h2>Directory</h2>
           <ul>
             <li><a href="#feed">Podcast Feed</a></li>
             <li><a href="#listen">Listen Everywhere</a></li>
             <li><a href="https://api.riverside.com/hosting/KCX6qbiI.rss">Raw RSS</a></li>
           </ul>
           <hr />
-          <p class="tiny">Webmaster mood:</p>
-          <p class="mood">LOUD + RETRO</p>
+          <div class="signal-box">
+            <p class="tiny">Signal</p>
+            <p class="mood">ONLINE</p>
+          </div>
         </aside>
 
         <section class="content box" id="feed">
-          <h2>Latest Feed Posts</h2>
+          <div class="section-header">
+            <div>
+              <p class="tiny">Latest Transmission</p>
+              <h2>Episodes</h2>
+            </div>
+          </div>
           <p class="status" id="status">Dialing up the feed...</p>
           <ul id="feed-list" class="feed-list"></ul>
         </section>
@@ -49,14 +60,12 @@
             <p class="tiny">VISITOR COUNTER</p>
             <p class="counter">0001337</p>
           </div>
-          <p class="tiny">
-            Copyright 1999-<span id="year"></span> Web Ring Survivor
-          </p>
+          <p class="tiny copyright">1999-<span id="year"></span> robot.gripe</p>
         </aside>
       </main>
 
       <footer class="footer box">
-        <marquee scrollamount="4">Thanks for surfing! Add this page to your favorites and come back for more robot yelling.</marquee>
+        <marquee scrollamount="4">Thanks for surfing! Add this page to your favorites and come back for more robot yelling.  Also, We're Fucked™</marquee>
       </footer>
     </div>
     <script src="/script.js" defer></script>
