@@ -136,10 +136,37 @@ a:hover {
 }
 
 .feed-list li {
+  display: flex;
+  gap: 12px;
   margin-bottom: 10px;
   padding: 10px;
   border: 2px dashed #ff8d00;
   background: #ffffef;
+}
+
+.episode-image {
+  flex: 0 0 auto;
+  width: 288px;
+  height: 288px;
+  border: 3px outset #c0c0c0;
+  background:
+    linear-gradient(45deg, #c0c0c0 25%, transparent 25%),
+    linear-gradient(-45deg, #c0c0c0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #c0c0c0 75%),
+    linear-gradient(-45deg, transparent 75%, #c0c0c0 75%);
+  background-color: #fff;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+  image-rendering: pixelated;
+  opacity: 0;
+}
+
+.episode-image.loaded {
+  opacity: 1;
+}
+
+.episode-body {
+  min-width: 0;
 }
 
 .feed-title {
@@ -216,5 +243,19 @@ a:hover {
 
   .content {
     order: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .feed-list li {
+    display: block;
+  }
+
+  .episode-image {
+    display: block;
+    float: none;
+    width: min(100%, 288px);
+    height: auto;
+    margin: 0 0 10px;
   }
 }
