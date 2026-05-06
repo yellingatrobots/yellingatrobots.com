@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yelling At Robots - RSS Jukebox</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="stars" aria-hidden="true"></div>
+    <div class="page-wrap">
+      <header class="top-banner">
+        <p class="tiny">BEST VIEWED IN NETSCAPE 4.7 AT 800x600</p>
+        <h1>YELLING AT ROBOTS</h1>
+        <marquee behavior="alternate" scrollamount="6">
+          <span class="blink">NEW EPISODES</span> * FRESH FEED * UNDER CONSTRUCTION * HOT AUDIO DROPS *
+        </marquee>
+      </header>
+
+      <main class="layout">
+        <aside class="left-rail box chrome">
+          <h2>Navigation</h2>
+          <ul>
+            <li><a href="#feed">Podcast Feed</a></li>
+            <li><a href="#listen">Listen Everywhere</a></li>
+            <li><a href="https://api.riverside.com/hosting/KCX6qbiI.rss">Raw RSS</a></li>
+          </ul>
+          <hr />
+          <p class="tiny">Webmaster mood:</p>
+          <p class="mood">LOUD + RETRO</p>
+        </aside>
+
+        <section class="content box" id="feed">
+          <h2>Latest Feed Posts</h2>
+          <p class="status" id="status">Dialing up the feed...</p>
+          <ul id="feed-list" class="feed-list"></ul>
+        </section>
+
+        <aside class="right-rail box chrome">
+          <h2 id="listen">Listen Everywhere</h2>
+          <ul class="platform-links">
+            <li><a href="https://podcasts.apple.com/podcast/id1878433691" target="_blank" rel="noopener noreferrer">Apple Podcasts</a></li>
+            <li><a href="https://open.spotify.com/show/56D2fZSNNJiiRLjbDuUctS" target="_blank" rel="noopener noreferrer">Spotify</a></li>
+            <li><a href="https://www.youtube.com/playlist?list=PL0Yo_vb29mGt2i-mWd0eJacj0kNnLtIKb" target="_blank" rel="noopener noreferrer">YouTube Playlist</a></li>
+            <li><a href="https://www.iheart.com/podcast/330738302/" target="_blank" rel="noopener noreferrer">iHeartRadio</a></li>
+            <li><a href="https://www.deezer.com/show/1002906221" target="_blank" rel="noopener noreferrer">Deezer</a></li>
+          </ul>
+          <div class="counter-wrap">
+            <p class="tiny">VISITOR COUNTER</p>
+            <p class="counter">0001337</p>
+          </div>
+          <p class="tiny">
+            Copyright 1999-<span id="year"></span> Web Ring Survivor
+          </p>
+        </aside>
+      </main>
+
+      <footer class="footer box">
+        <marquee scrollamount="4">Thanks for surfing! Add this page to your favorites and come back for more robot yelling.</marquee>
+      </footer>
+    </div>
+    <script src="/script.js" defer></script>
+  </body>
+</html>
