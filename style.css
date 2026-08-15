@@ -311,6 +311,51 @@ a:hover {
   font-size: 0.92rem;
 }
 
+.episode-heading {
+  max-width: 760px;
+  margin: 0;
+  color: #000a9f;
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.episode-hero {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0 20px;
+  padding: 12px;
+  border: 3px ridge #ff8d00;
+  background: linear-gradient(180deg, #ffffff, #fff7d1 55%, #ffe6fb), #ffffef;
+  box-shadow: 5px 5px 0 #4a005f55;
+}
+
+.episode-hero .episode-image {
+  opacity: 1;
+}
+
+.episode-notes {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 3px double #ff8d00;
+  line-height: 1.5;
+}
+
+.episode-notes h2 {
+  margin-top: 0;
+}
+
+.episode-notes p {
+  margin: 0 0 0.9em;
+}
+
+.episode-navigation {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 2px dashed #001aa0;
+}
+
 .feed-desc {
   margin: 0;
   line-height: 1.45;
@@ -396,6 +441,17 @@ a:hover {
 }
 
 @media (max-width: 560px) {
+  .episode-hero {
+    display: block;
+  }
+
+  .episode-hero .episode-image {
+    display: block;
+    width: min(100%, 288px);
+    height: auto;
+    margin: 0 0 10px;
+  }
+
   .feed-list li {
     display: block;
   }

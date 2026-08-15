@@ -53,6 +53,19 @@ async function loadYoutubeLinks() {
   }
 }
 
+async function loadEpisodeUrls() {
+  try {
+    const response = await fetch("/episodes.json");
+    if (!response.ok) return new Map();
+
+    const episodes = await response.json();
+    return new Map(episodes.map((episode) => [normalizeTitle(episode.title), episode.url]));
+  } catch (error) {
+    console.error(error);
+    return new Map();
+  }
+}
+
 function placeholderBitmap() {
   const size = 288;
   const block = 24;
@@ -87,9 +100,10 @@ async function loadFeed() {
   const list = document.getElementById("feed-list");
 
   try {
-    const [response, youtubeLinks] = await Promise.all([
+    const [response, youtubeLinks, episodeUrls] = await Promise.all([
       fetch("/.netlify/functions/feed"),
       loadYoutubeLinks(),
+      loadEpisodeUrls(),
     ]);
     if (!response.ok) {
       throw new Error(`Feed request failed with status ${response.status}`);
@@ -119,7 +133,8 @@ async function loadFeed() {
       const link = text(item, "link");
       const enclosureUrl = firstAttr(item, "enclosure", "url");
       const youtubeUrl = youtubeLinks.get(normalizeTitle(title));
-      const episodeUrl = youtubeUrl || link || enclosureUrl || "https://api.riverside.com/hosting/KCX6qbiI.rss";
+      const internalEpisodeUrl = episodeUrls.get(normalizeTitle(title));
+      const episodeUrl = internalEpisodeUrl || youtubeUrl || link || enclosureUrl || "https://api.riverside.com/hosting/KCX6qbiI.rss";
       const pubDate = safeDate(text(item, "pubDate"));
       const rawDescription = text(item, "description");
       const description = stripHtml(rawDescription).slice(0, 260);
@@ -127,7 +142,7 @@ async function loadFeed() {
 
       const episodeImage = document.createElement("img");
       episodeImage.className = "episode-image";
-      episodeImage.alt = "";
+      episodeImage.alt = title;
       episodeImage.width = 288;
       episodeImage.height = 288;
 
@@ -170,7 +185,7 @@ async function loadFeed() {
       fragment.appendChild(li);
     });
 
-    list.appendChild(fragment);
+    list.replaceChildren(fragment);
     status.textContent = `Loaded ${Math.min(items.length, 25)} episodes from the feed.`;
   } catch (error) {
     status.textContent = "Could not load feed. Try reloading in a minute.";
