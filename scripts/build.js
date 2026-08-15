@@ -94,6 +94,10 @@ function imageUrl(value) {
   return value && typeof value === "object" ? String(value["@_href"] || "") : "";
 }
 
+function transcriptUrl(value) {
+  return asArray(value).find((entry) => entry && typeof entry === "object" && entry["@_url"])?.["@_url"] || "";
+}
+
 function proxyImageUrl(url) {
   return `/.netlify/functions/futz-image?url=${encodeURIComponent(url)}`;
 }
@@ -130,6 +134,7 @@ function episodeFromItem(item, channelImage, usedSlugs) {
     url: `${SITE_URL}/episodes/${slug}/`,
     link: text(item.link),
     enclosureUrl: item.enclosure?.["@_url"] || "",
+    transcriptUrl: transcriptUrl(item["podcast:transcript"]),
     image,
     date,
   };
@@ -242,6 +247,7 @@ function renderEpisodePage(episode) {
     mainEntityOfPage: episode.url,
     image: episode.image || SHOW_IMAGE,
     datePublished: episode.date.iso || undefined,
+    transcript: episode.transcript || undefined,
     partOfSeries: {
       "@type": "PodcastSeries",
       name: SHOW_NAME,
@@ -287,6 +293,7 @@ function renderEpisodePage(episode) {
             <h2>Show Notes</h2>
             ${notes}
           </section>
+          ${episode.transcript ? `<details class="episode-transcript"><summary>Read the full transcript</summary><div class="transcript-text">${escapeHtml(episode.transcript)}</div></details>` : ""}
           <p class="episode-navigation"><a href="/">← Back to all episodes</a></p>
         </article>
       </main>
@@ -294,6 +301,25 @@ function renderEpisodePage(episode) {
     </div>
   </body>
 </html>`;
+}
+
+async function fetchTranscript(episode) {
+  if (!episode.transcriptUrl) return episode;
+
+  try {
+    const response = await fetch(episode.transcriptUrl, {
+      headers: {
+        "User-Agent": "yellingatrobots-static-site-builder",
+        Accept: "text/plain, */*;q=0.8",
+      },
+    });
+    if (!response.ok) throw new Error(`status ${response.status}`);
+
+    return { ...episode, transcript: (await response.text()).trim() };
+  } catch (error) {
+    console.warn(`Could not fetch transcript for ${episode.title}: ${error.message}`);
+    return episode;
+  }
 }
 
 async function fetchFeed() {
@@ -316,7 +342,11 @@ async function build() {
 
   const channelImage = imageUrl(channel["itunes:image"]);
   const usedSlugs = new Set();
-  const episodes = asArray(channel.item).map((item) => episodeFromItem(item, channelImage, usedSlugs));
+  const episodes = await Promise.all(
+    asArray(channel.item)
+      .map((item) => episodeFromItem(item, channelImage, usedSlugs))
+      .map(fetchTranscript),
+  );
   if (!episodes.length) throw new Error("RSS feed has no episodes.");
 
   await fs.rm(DIST, { recursive: true, force: true });
@@ -354,7 +384,8 @@ async function build() {
     }),
   );
 
-  console.log(`Built ${episodes.length} episode pages in ${path.relative(ROOT, DIST)}/`);
+  const transcriptCount = episodes.filter((episode) => episode.transcript).length;
+  console.log(`Built ${episodes.length} episode pages (${transcriptCount} with transcripts) in ${path.relative(ROOT, DIST)}/`);
 }
 
 build().catch((error) => {

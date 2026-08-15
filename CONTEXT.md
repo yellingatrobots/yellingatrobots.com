@@ -46,3 +46,6 @@ Episodes that demonstrate or examine software development with AI assistance.
 
 **Perspective episodes**:
 Conversations about using AI responsibly and sanely in real engineering and technology work, explained so non-specialists can understand why the news matters and how much they should care.
+
+**Transcript**:
+The spoken text of an episode, provided as a convenience for readers and for people who prefer reading to listening. Automatically generated transcripts may contain errors or unedited asides.

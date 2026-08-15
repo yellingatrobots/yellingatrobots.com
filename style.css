@@ -350,6 +350,27 @@ a:hover {
   margin: 0 0 0.9em;
 }
 
+.episode-transcript {
+  margin-top: 18px;
+  padding: 10px;
+  border: 2px outset #fff;
+  background: #fffde7;
+}
+
+.episode-transcript summary {
+  color: #001f9f;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.transcript-text {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px dashed #ff8d00;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
 .episode-navigation {
   margin-top: 20px;
   padding-top: 10px;
