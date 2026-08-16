@@ -2,6 +2,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { createHash } = require("node:crypto");
 const { XMLParser } = require("fast-xml-parser");
+const { PLAYLIST_URL, fetchYoutubeVideos } = require("../lib/youtube-links");
 
 const ROOT = path.resolve(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
@@ -20,6 +21,14 @@ function text(value) {
   if (typeof value === "string" || typeof value === "number") return String(value).trim();
   if (value && typeof value === "object") return String(value["#text"] || "").trim();
   return "";
+}
+
+function normalizeTitle(title) {
+  return title
+    .toLowerCase()
+    .replace(/&amp;/g, "&")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function escapeHtml(value) {
@@ -262,14 +271,21 @@ function leftRail() {
         </aside>`;
 }
 
-function rightRail() {
+function rightRail(episode) {
+  const youtubeUrl = episode.youtubeUrl || PLAYLIST_URL;
+  const youtubeLabel = episode.youtubeUrl ? "YouTube Episode" : "YouTube Playlist";
+  const audioLink = episode.enclosureUrl
+    ? `<li><a href="${escapeHtml(episode.enclosureUrl)}" target="_blank" rel="noopener noreferrer">Episode Audio</a></li>`
+    : "";
+
   return `
         <aside class="right-rail box chrome">
           <h2 id="listen">Listen Everywhere</h2>
           <ul class="platform-links">
             <li><a href="https://podcasts.apple.com/podcast/id1878433691" target="_blank" rel="noopener noreferrer">Apple Podcasts</a></li>
             <li><a href="https://open.spotify.com/show/56D2fZSNNJiiRLjbDuUctS" target="_blank" rel="noopener noreferrer">Spotify</a></li>
-            <li><a href="https://www.youtube.com/playlist?list=PL0Yo_vb29mGt2i-mWd0eJacj0kNnLtIKb" target="_blank" rel="noopener noreferrer">YouTube Playlist</a></li>
+            <li><a href="${escapeHtml(youtubeUrl)}" target="_blank" rel="noopener noreferrer">${youtubeLabel}</a></li>
+            ${audioLink}
             <li><a href="https://www.iheart.com/podcast/330738302/" target="_blank" rel="noopener noreferrer">iHeartRadio</a></li>
             <li><a href="https://www.deezer.com/show/1002906221" target="_blank" rel="noopener noreferrer">Deezer</a></li>
           </ul>
@@ -360,7 +376,7 @@ function renderEpisodePage(episode) {
           ${episode.transcript ? `<details class="episode-transcript"><summary>Read the full transcript</summary><div class="transcript-text">${escapeHtml(episode.transcript)}</div></details>` : ""}
           <p class="episode-navigation"><a href="/">← Back to all episodes</a></p>
         </article>
-        ${rightRail()}
+        ${rightRail(episode)}
       </main>
       ${footer()}
     </div>
@@ -387,6 +403,16 @@ async function fetchTranscript(episode) {
   }
 }
 
+async function loadYoutubeLinks() {
+  try {
+    const videos = await fetchYoutubeVideos();
+    return new Map(videos.map((video) => [normalizeTitle(video.title), video.url]));
+  } catch (error) {
+    console.warn(`Could not fetch YouTube episode links: ${error.message}`);
+    return new Map();
+  }
+}
+
 async function fetchFeed() {
   const response = await fetch(FEED_URL, {
     headers: {
@@ -407,6 +433,7 @@ async function build() {
 
   const channelImage = imageUrl(channel["itunes:image"]);
   const usedSlugs = new Set();
+  const youtubeLinks = await loadYoutubeLinks();
   const episodes = (await Promise.all(
     asArray(channel.item)
       .map((item) => episodeFromItem(item, channelImage, usedSlugs))
@@ -414,6 +441,7 @@ async function build() {
   )).map((episode, index, allEpisodes) => ({
     ...episode,
     badge: episodeBadge(episode, index, allEpisodes),
+    youtubeUrl: youtubeLinks.get(normalizeTitle(episode.title)),
   }));
   if (!episodes.length) throw new Error("RSS feed has no episodes.");
 
