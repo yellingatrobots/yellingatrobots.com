@@ -62,7 +62,7 @@ function htmlToText(value) {
 }
 
 function anchorHtml(href, label) {
-  return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
+  return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`;
 }
 
 function linkifyText(value, links) {
