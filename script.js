@@ -40,6 +40,26 @@ function normalizeTitle(title) {
     .trim();
 }
 
+function episodeBadge(item, index, items) {
+  const season = firstText(item, "itunes:season");
+  const number = Number(firstText(item, "itunes:episode"));
+  if (Number.isInteger(number) && number > 0) {
+    return season ? `S${season} EP ${number}` : `EP ${number}`;
+  }
+
+  const nextNumberedItem = items.slice(index + 1).find((candidate) => {
+    const candidateNumber = Number(firstText(candidate, "itunes:episode"));
+    return Number.isInteger(candidateNumber) && candidateNumber > 0;
+  });
+  if (nextNumberedItem) {
+    const nextNumber = Number(firstText(nextNumberedItem, "itunes:episode"));
+    const nextSeason = firstText(nextNumberedItem, "itunes:season");
+    return `S${season || nextSeason || "1"} EP ${nextNumber + 1}`;
+  }
+
+  return `EP ${index + 1}`;
+}
+
 async function loadYoutubeLinks() {
   try {
     const response = await fetch("/.netlify/functions/youtube-links");
@@ -113,8 +133,9 @@ async function loadFeed() {
     const channel = doc.getElementsByTagName("channel")[0] || doc;
     const channelImage = firstAttr(channel, "itunes:image", "href") || firstText(channel, "url");
 
-    items.slice(0, 25).forEach((item) => {
+    items.slice(0, 25).forEach((item, index) => {
       const li = document.createElement("li");
+      li.dataset.badge = episodeBadge(item, index, items);
       const title = text(item, "title") || "Untitled episode";
       const season = firstText(item, "itunes:season");
       const episodeNumber = firstText(item, "itunes:episode");

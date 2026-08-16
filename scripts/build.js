@@ -166,6 +166,8 @@ function episodeFromItem(item, channelImage, usedSlugs) {
   return {
     title,
     description,
+    season: text(item["itunes:season"]),
+    episodeNumber: text(item["itunes:episode"]),
     plainDescription,
     excerpt: plainDescription.replace(/\s+/g, " ").trim().slice(0, 260),
     guid,
@@ -178,6 +180,24 @@ function episodeFromItem(item, channelImage, usedSlugs) {
     image,
     date,
   };
+}
+
+function episodeBadge(episode, index, episodes) {
+  const number = Number(episode.episodeNumber);
+  if (Number.isInteger(number) && number > 0) {
+    return episode.season ? `S${episode.season} EP ${number}` : `EP ${number}`;
+  }
+
+  const nextNumberedEpisode = episodes.slice(index + 1).find((candidate) => {
+    const candidateNumber = Number(candidate.episodeNumber);
+    return Number.isInteger(candidateNumber) && candidateNumber > 0;
+  });
+  if (nextNumberedEpisode) {
+    const inferredNumber = Number(nextNumberedEpisode.episodeNumber) + 1;
+    return `S${episode.season || nextNumberedEpisode.season || "1"} EP ${inferredNumber}`;
+  }
+
+  return `EP ${index + 1}`;
 }
 
 function jsonLd(value) {
@@ -268,7 +288,7 @@ function renderEpisodeCard(episode) {
   const image = episode.image ? proxyImageUrl(episode.image) : "/favicon.svg";
   const description = episode.excerpt ? `${episode.excerpt}${episode.plainDescription.length > 260 ? "..." : ""}` : "Listen to this Yelling At Robots episode.";
   return `
-          <li>
+          <li data-badge="${escapeHtml(episode.badge)}">
             <img class="episode-image loaded" src="${escapeHtml(image)}" alt="${escapeHtml(episode.title)}" width="288" height="288" loading="lazy" />
             <div class="episode-body">
               <a class="feed-title" href="${episode.path}">${escapeHtml(episode.title)}</a>
@@ -387,11 +407,14 @@ async function build() {
 
   const channelImage = imageUrl(channel["itunes:image"]);
   const usedSlugs = new Set();
-  const episodes = await Promise.all(
+  const episodes = (await Promise.all(
     asArray(channel.item)
       .map((item) => episodeFromItem(item, channelImage, usedSlugs))
       .map(fetchTranscript),
-  );
+  )).map((episode, index, allEpisodes) => ({
+    ...episode,
+    badge: episodeBadge(episode, index, allEpisodes),
+  }));
   if (!episodes.length) throw new Error("RSS feed has no episodes.");
 
   await fs.rm(DIST, { recursive: true, force: true });
