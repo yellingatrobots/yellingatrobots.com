@@ -258,6 +258,10 @@ a:hover {
   font-weight: 900;
 }
 
+.feed-list li[data-badge]::before {
+  content: attr(data-badge);
+}
+
 .episode-image {
   flex: 0 0 auto;
   width: 288px;

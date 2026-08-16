@@ -130,6 +130,11 @@ async function loadFeed() {
     items.slice(0, 25).forEach((item) => {
       const li = document.createElement("li");
       const title = text(item, "title") || "Untitled episode";
+      const season = firstText(item, "itunes:season");
+      const episodeNumber = firstText(item, "itunes:episode");
+      if (episodeNumber) {
+        li.dataset.badge = season ? `S${season} EP ${episodeNumber}` : `EP ${episodeNumber}`;
+      }
       const link = text(item, "link");
       const enclosureUrl = firstAttr(item, "enclosure", "url");
       const youtubeUrl = youtubeLinks.get(normalizeTitle(title));
