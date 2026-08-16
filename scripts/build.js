@@ -61,9 +61,47 @@ function htmlToText(value) {
     .trim();
 }
 
+function anchorHtml(href, label) {
+  return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
+}
+
+function linkifyText(value, links) {
+  const pattern = /__EPISODE_LINK_(\d+)__|https?:\/\/[^\s<]+/g;
+  let output = "";
+  let cursor = 0;
+
+  for (const match of value.matchAll(pattern)) {
+    const index = match.index ?? value.length;
+    output += escapeHtml(value.slice(cursor, index));
+
+    if (match[1] !== undefined) {
+      const link = links[Number(match[1])];
+      output += link ? anchorHtml(link.href, link.label) : escapeHtml(match[0]);
+    } else {
+      const punctuation = match[0].match(/[),.;!?]+$/)?.[0] || "";
+      const href = match[0].slice(0, match[0].length - punctuation.length);
+      output += anchorHtml(href, href);
+      output += escapeHtml(punctuation);
+    }
+
+    cursor = index + match[0].length;
+  }
+
+  return output + escapeHtml(value.slice(cursor));
+}
+
 function notesHtml(value) {
-  const lines = htmlToText(value).split("\n").filter(Boolean);
-  return lines.map((line) => `<p>${escapeHtml(line)}</p>`).join("\n");
+  const links = [];
+  const withLinkTokens = String(value).replace(
+    /<a\b[^>]*\bhref\s*=\s*["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi,
+    (_, href, label) => {
+      const token = `__EPISODE_LINK_${links.length}__`;
+      links.push({ href: decodeEntities(href), label: htmlToText(label) || href });
+      return token;
+    },
+  );
+  const lines = htmlToText(withLinkTokens).split("\n").filter(Boolean);
+  return lines.map((line) => `<p>${linkifyText(line, links)}</p>`).join("\n");
 }
 
 function slugify(value) {
