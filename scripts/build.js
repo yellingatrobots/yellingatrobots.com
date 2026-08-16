@@ -187,7 +187,7 @@ function banner() {
       </header>`;
 }
 
-function rails() {
+function leftRail() {
   return `
         <aside class="left-rail box chrome">
           <h2>Directory</h2>
@@ -201,7 +201,11 @@ function rails() {
             <p class="tiny">Signal</p>
             <p class="mood">ONLINE</p>
           </div>
-        </aside>
+        </aside>`;
+}
+
+function rightRail() {
+  return `
         <aside class="right-rail box chrome">
           <h2 id="listen">Listen Everywhere</h2>
           <ul class="platform-links">
@@ -275,7 +279,7 @@ function renderEpisodePage(episode) {
     <div class="page-wrap">
       ${banner()}
       <main class="layout">
-        ${rails()}
+        ${leftRail()}
         <article class="content box episode-page">
           <div class="section-header">
             <div>
@@ -298,6 +302,7 @@ function renderEpisodePage(episode) {
           ${episode.transcript ? `<details class="episode-transcript"><summary>Read the full transcript</summary><div class="transcript-text">${escapeHtml(episode.transcript)}</div></details>` : ""}
           <p class="episode-navigation"><a href="/">← Back to all episodes</a></p>
         </article>
+        ${rightRail()}
       </main>
       ${footer()}
     </div>
