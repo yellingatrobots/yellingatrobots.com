@@ -4,7 +4,7 @@
     "check": "node --check script.js && node --check scripts/build.js && node --check netlify/functions/feed.js && node --check netlify/functions/image-proxy.js && node --check netlify/functions/futz-image.js && node --check netlify/functions/youtube-links.js"
   },
   "dependencies": {
-    "fast-xml-parser": "^5.10.1",
-    "sharp": "^0.33.5"
+    "fast-xml-parser": "5.10.1",
+    "sharp": "0.35.3"
   }
 }
