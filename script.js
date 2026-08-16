@@ -40,6 +40,26 @@ function normalizeTitle(title) {
     .trim();
 }
 
+function episodeBadge(item, index, items) {
+  const season = firstText(item, "itunes:season");
+  const number = Number(firstText(item, "itunes:episode"));
+  if (Number.isInteger(number) && number > 0) {
+    return season ? `S${season} EP ${number}` : `EP ${number}`;
+  }
+
+  const nextNumberedItem = items.slice(index + 1).find((candidate) => {
+    const candidateNumber = Number(firstText(candidate, "itunes:episode"));
+    return Number.isInteger(candidateNumber) && candidateNumber > 0;
+  });
+  if (nextNumberedItem) {
+    const nextNumber = Number(firstText(nextNumberedItem, "itunes:episode"));
+    const nextSeason = firstText(nextNumberedItem, "itunes:season");
+    return `S${season || nextSeason || "1"} EP ${nextNumber + 1}`;
+  }
+
+  return `EP ${index + 1}`;
+}
+
 async function loadYoutubeLinks() {
   try {
     const response = await fetch("/.netlify/functions/youtube-links");
@@ -47,6 +67,19 @@ async function loadYoutubeLinks() {
 
     const data = await response.json();
     return new Map((data.videos || []).map((video) => [normalizeTitle(video.title), video.url]));
+  } catch (error) {
+    console.error(error);
+    return new Map();
+  }
+}
+
+async function loadEpisodeUrls() {
+  try {
+    const response = await fetch("/episodes.json");
+    if (!response.ok) return new Map();
+
+    const episodes = await response.json();
+    return new Map(episodes.map((episode) => [normalizeTitle(episode.title), episode.url]));
   } catch (error) {
     console.error(error);
     return new Map();
@@ -87,9 +120,10 @@ async function loadFeed() {
   const list = document.getElementById("feed-list");
 
   try {
-    const [response, youtubeLinks] = await Promise.all([
+    const [response, youtubeLinks, episodeUrls] = await Promise.all([
       fetch("/.netlify/functions/feed"),
       loadYoutubeLinks(),
+      loadEpisodeUrls(),
     ]);
     if (!response.ok) {
       throw new Error(`Feed request failed with status ${response.status}`);
@@ -113,18 +147,15 @@ async function loadFeed() {
     const channel = doc.getElementsByTagName("channel")[0] || doc;
     const channelImage = firstAttr(channel, "itunes:image", "href") || firstText(channel, "url");
 
-    items.slice(0, 25).forEach((item) => {
+    items.slice(0, 25).forEach((item, index) => {
       const li = document.createElement("li");
+      li.dataset.badge = episodeBadge(item, index, items);
       const title = text(item, "title") || "Untitled episode";
-      const season = firstText(item, "itunes:season");
-      const episodeNumber = firstText(item, "itunes:episode");
-      if (episodeNumber) {
-        li.dataset.badge = season ? `S${season} EP ${episodeNumber}` : `EP ${episodeNumber}`;
-      }
       const link = text(item, "link");
       const enclosureUrl = firstAttr(item, "enclosure", "url");
       const youtubeUrl = youtubeLinks.get(normalizeTitle(title));
-      const episodeUrl = youtubeUrl || link || enclosureUrl || "https://api.riverside.com/hosting/KCX6qbiI.rss";
+      const internalEpisodeUrl = episodeUrls.get(normalizeTitle(title));
+      const episodeUrl = internalEpisodeUrl || youtubeUrl || link || enclosureUrl || "https://api.riverside.com/hosting/KCX6qbiI.rss";
       const pubDate = safeDate(text(item, "pubDate"));
       const rawDescription = text(item, "description");
       const description = stripHtml(rawDescription).slice(0, 260);
@@ -132,7 +163,7 @@ async function loadFeed() {
 
       const episodeImage = document.createElement("img");
       episodeImage.className = "episode-image";
-      episodeImage.alt = "";
+      episodeImage.alt = title;
       episodeImage.width = 288;
       episodeImage.height = 288;
 
@@ -175,7 +206,7 @@ async function loadFeed() {
       fragment.appendChild(li);
     });
 
-    list.appendChild(fragment);
+    list.replaceChildren(fragment);
     status.textContent = `Loaded ${Math.min(items.length, 25)} episodes from the feed.`;
   } catch (error) {
     status.textContent = "Could not load feed. Try reloading in a minute.";
